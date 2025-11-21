@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keorung - Game Design Portfolio</title>
+    
+    <!-- [중요] 메타 정보는 index.html에 그대로 유지 -->
+    <meta property="og:title" content="Keorung's Portfolio Hub">
+    <meta property="og:description" content="Market Analysis, Combat Design, Data Simulation">
+    <meta property="og:image" content="project1_love/시로코 첫인상현인상.jpg"> <!-- 폴더 경로 수정 -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard/dist/web/static/pretendard.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Pretendard', 'sans-serif'] },
+                    colors: {
+                        'phase-1': '#818cf8', // Indigo (Analysis)
+                        'phase-2': '#f472b6', // Pink (Design)
+                        'phase-3': '#34d399', // Green (Data)
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #050505; color: #e5e5e5; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            border-color: var(--border-color);
+            background: rgba(255, 255, 255, 0.07);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+        .active-glow { box-shadow: 0 0 20px rgba(129, 140, 248, 0.15); border-color: rgba(129, 140, 248, 0.4); }
+        
+        /* Coming Soon Style */
+        .locked { opacity: 0.5; cursor: not-allowed !important; }
+        .locked:hover { transform: none; border-color: rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.03); }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-6">
+
+    <!-- Header -->
+    <header class="text-center mb-12 animate-[fadeIn_1s_ease-out]">
+        <p class="text-sm tracking-[0.3em] text-gray-500 uppercase mb-2">Game Designer Portfolio</p>
+        <h1 class="text-5xl font-black text-white mb-4">Keorung</h1>
+        <p class="text-lg text-gray-400 max-w-2xl mx-auto">
+            "시장(Why)을 읽고, 재미(What)를 설계하며, 데이터(How)로 증명합니다."<br>
+            논리와 감성이 결합된 3단계 기획 프로세스
+        </p>
+    </header>
+
+    <!-- Roadmap Grid -->
+    <main class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full mb-16">
+
+        <!-- PHASE 1: Analysis (Active) -->
+        <div class="glass-card active-glow rounded-2xl p-8 flex flex-col relative overflow-hidden group" style="--border-color: #818cf8;">
+            <div class="absolute top-0 right-0 bg-phase-1 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">PHASE 01. 완료</div>
+            
+            <div class="w-14 h-14 rounded-xl bg-indigo-900/50 flex items-center justify-center text-phase-1 text-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-brain"></i>
+            </div>
+            
+            <h2 class="text-2xl font-bold text-white mb-2">애정의 경제학</h2>
+            <h3 class="text-sm text-indigo-400 font-semibold mb-4">서브컬처 시장 분석 및 유저 심리</h3>
+            
+            <p class="text-gray-400 text-sm leading-relaxed flex-grow mb-8">
+                "왜 유저들은 데이터에 지갑을 여는가?"<br>
+                뇌과학적 유인(RPE)과 서사적 정당성을 통해 유저를 몰입시키고 수익화하는 메커니즘을 분석합니다.
+            </p>
+            
+            <div class="flex gap-3 mt-auto">
+                <!-- **수정된 부분: doc.html 앞에 폴더명 추가** -->
+                <a href="project1_love/doc.html" class="flex-1 bg-zinc-800 hover:bg-indigo-600 text-white py-3 rounded-lg text-center text-sm font-bold transition border border-zinc-700 hover:border-indigo-500">
+                    <i class="far fa-file-alt mr-2"></i> 문서 보기
+                </a>
+                <!-- **수정된 부분: slide.html 앞에 폴더명 추가** -->
+                <a href="project1_love/slide.html" class="flex-1 bg-zinc-800 hover:bg-indigo-600 text-white py-3 rounded-lg text-center text-sm font-bold transition border border-zinc-700 hover:border-indigo-500">
+                    <i class="fas fa-desktop mr-2"></i> 발표 모드
+                </a>
+            </div>
+        </div>
+
+        <!-- PHASE 2: Design (Locked) -->
+        <div class="glass-card locked rounded-2xl p-8 flex flex-col relative border-dashed" style="--border-color: #f472b6;">
+            <div class="absolute top-0 right-0 bg-zinc-800 text-gray-500 text-xs font-bold px-3 py-1 rounded-bl-lg">PHASE 02. 준비중</div>
+            
+            <div class="w-14 h-14 rounded-xl bg-zinc-800 flex items-center justify-center text-gray-600 text-2xl mb-6">
+                <i class="fas fa-chess-board"></i>
+            </div>
+            
+            <h2 class="text-2xl font-bold text-gray-500 mb-2">전투 메타 설계</h2>
+            <h3 class="text-sm text-gray-600 font-semibold mb-4">스킬 메커니즘 & 밸런스 구조화</h3>
+            
+            <p class="text-gray-600 text-sm leading-relaxed flex-grow mb-8">
+                캐릭터의 개성(Concept)을 수치(Math)로 변환하는 과정.<br>
+                전투의 재미를 구조화하고 메타 고착화를 방지하는 시스템 기획 방법론을 다룹니다.
+            </p>
+            
+            <div class="mt-auto border-t border-zinc-800 pt-4 text-center">
+                <span class="text-xs text-gray-600 flex items-center justify-center gap-2">
+                    <i class="fas fa-lock"></i> Coming Soon
+                </span>
+            </div>
+        </div>
+
+        <!-- PHASE 3: Simulation (Locked) -->
+        <div class="glass-card locked rounded-2xl p-8 flex flex-col relative border-dashed" style="--border-color: #34d399;">
+            <div class="absolute top-0 right-0 bg-zinc-800 text-gray-500 text-xs font-bold px-3 py-1 rounded-bl-lg">PHASE 03. 준비중</div>
+            
+            <div class="w-14 h-14 rounded-xl bg-zinc-800 flex items-center justify-center text-gray-600 text-2xl mb-6">
+                <i class="fas fa-calculator"></i>
+            </div>
+            
+            <h2 class="text-2xl font-bold text-gray-500 mb-2">전투 시뮬레이터</h2>
+            <h3 class="text-sm text-gray-600 font-semibold mb-4">Excel/VBA 데이터 검증 모델</h3>
+            
+            <p class="text-gray-600 text-sm leading-relaxed flex-grow mb-8">
+                "기획은 감으로 끝나선 안 됩니다."<br>
+                VBA를 활용하여 전투 양상을 예측하고, DPS 및 밸런스를 사전에 검증하는 툴 제작 과정을 소개합니다.
+            </p>
+            
+            <div class="mt-auto border-t border-zinc-800 pt-4 text-center">
+                <span class="text-xs text-gray-600 flex items-center justify-center gap-2">
+                    <i class="fas fa-lock"></i> Coming Soon
+                </span>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-gray-600 text-sm">
+        <p>Designed & Analyzed by <strong class="text-gray-400">Keorung</strong></p>
+        <p class="mt-2 text-xs opacity-50">© 2025 Game Design Portfolio Project</p>
+    </footer>
+
+</body>
+</html>
