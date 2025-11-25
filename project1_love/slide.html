@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>애정의 경제학 - Presentation Deck</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard/dist/web/static/pretendard.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* --- [Base Style] --- */
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #050505;
+            color: #e5e5e5;
+            overflow: hidden;
+            margin: 0; padding: 0;
+            width: 100vw; height: 100vh;
+        }
+
+        /* --- [Deck System] --- */
+        #deck { position: relative; width: 100%; height: 100%; }
+        .slide {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.5s ease-in-out;
+            display: flex; flex-direction: column;
+            padding: 2.5rem 5rem;
+            box-sizing: border-box;
+            background-color: #050505; z-index: 1;
+        }
+        .slide.active { opacity: 1; visibility: visible; z-index: 10; }
+
+        /* --- [Layout Utilities] --- */
+        .header {
+            flex: 0 0 auto; display: flex; justify-content: space-between; align-items: flex-end;
+            border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px;
+        }
+        .header h1 { font-size: 2.2rem; font-weight: 800; color: #fff; margin: 0; }
+        .header .sub { font-size: 1.1rem; color: #888; margin-bottom: 4px; }
+
+        .content {
+            flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center;
+            height: 100%; overflow: hidden;
+        }
+
+        /* Grid System (A4 비율 유지) */
+        .grid-2 {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
+            height: 100%; align-items: center; justify-content: center;
+        }
+
+        /* --- [TOC Grid System] --- */
+        .toc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; height: 100%; padding-bottom: 10px; }
+        .toc-column { display: flex; flex-direction: column; gap: 25px; height: 100%; }
+        .toc-box {
+            background: #151515; padding: 25px; border-radius: 12px;
+            display: flex; flex-direction: column;
+            cursor: pointer; border: 1px solid #333; transition: 0.2s;
+            position: relative;
+        }
+        .toc-box:hover { background: #222; border-color: #666; transform: translateY(-2px); }
+        
+        .toc-sub-container { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .toc-item-row { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .toc-divider { height: 1px; background: #333; margin: 15px 0; flex: none; }
+
+        /* --- [Components] --- */
+        .text-box { font-size: 1.1rem; line-height: 1.6; color: #ccc; }
+        .text-box h3 { font-size: 1.6rem; margin-bottom: 15px; font-weight: 700; }
+
+        .point-box {
+            background: #151515; padding: 20px;
+            border-radius: 8px; border: 1px solid #333; margin-bottom: 20px;
+            border-left-width: 4px;
+        }
+
+        .img-container {
+            background: #111; border: 1px solid #333; border-radius: 8px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            overflow: hidden; position: relative; width: 100%;
+        }
+        .img-container.has-img { border: none; background: transparent; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .img-caption {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.8); color: #fff; padding: 8px;
+            font-size: 0.9rem; text-align: center; line-height: 1.4; z-index: 10;
+        }
+
+        /* --- [Chart Styles] --- */
+        .chart-wrapper {
+            width: 90%; height: 200px;
+            display: flex; align-items: flex-end; justify-content: space-between;
+            padding: 20px 0; margin: 0 auto;
+        }
+        .chart-group-compare { display: flex; flex-direction: column; align-items: center; width: 40%; height: 100%; justify-content: flex-end; }
+        .bars-container { display: flex; align-items: flex-end; gap: 10px; height: 100%; width: 100%; justify-content: center; }
+        .bar-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; width: 40px; }
+        .chart-bar { width: 100%; border-radius: 4px 4px 0 0; transition: height 1s ease-out; min-height: 2px; }
+        .slide.active .chart-bar { height: var(--h) !important; }
+        .chart-value { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); color: #fff; font-weight: bold; font-size: 0.9rem; white-space: nowrap; }
+        .chart-legend { position: absolute; bottom: -25px; font-size: 0.8rem; color: #888; text-align: center; width: 60px; }
+
+        /* --- [Specific] --- */
+        .myth-box { background: #222; padding: 15px; border-left: 4px solid #555; margin-bottom: 10px; border-radius: 0 4px 4px 0; }
+        .truth-box { background: rgba(129, 140, 248, 0.1); padding: 15px; border-left: 4px solid #818cf8; border-radius: 0 4px 4px 0; }
+        
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .highlight-circle {
+            position: absolute; border: 4px solid #ef4444; border-radius: 50%;
+            animation: pulse-red 2s infinite; pointer-events: none;
+        }
+        .community-post {
+            background: #222; border: 1px solid #444; padding: 20px; border-radius: 8px;
+            position: relative; margin-bottom: 15px;
+        }
+        .post-badge {
+            background: rgba(236, 72, 153, 0.2); color: #ec4899; 
+            font-size: 0.8em; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(236, 72, 153, 0.4);
+            float: right;
+        }
+
+        /* --- [Animation] --- */
+        .animate-in { animation: slideUpFade 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
+        .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; }
+        @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
+
+        /* --- [Colors] --- */
+        .text-indigo { color: #818cf8; } .text-pink { color: #ec4899; } .text-yellow { color: #fbbf24; }
+        .text-green { color: #4ade80; } .text-red { color: #ef4444; } .text-blue { color: #60a5fa; }
+
+        /* --- [Nav] --- */
+        .progress-bar { position: fixed; bottom: 0; left: 0; height: 4px; background: linear-gradient(to right, #818cf8, #ec4899); width: 0%; transition: width 0.3s; z-index: 100; }
+        .nav-ui { position: fixed; bottom: 2rem; right: 2rem; z-index: 50; display: flex; gap: 1rem; }
+        .btn { width: 50px; height: 50px; border-radius: 50%; background: #222; color: #fff; border: 1px solid #444; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+        .btn:hover { background: #333; border-color: #818cf8; }
+        .page-num { position: fixed; bottom: 2.5rem; right: 14rem; color: #666; font-family: monospace; font-size: 1.2rem; z-index: 50; }
+    </style>
+</head>
+<body>
+
+    <div class="progress-bar" id="progress"></div>
+    <div class="page-num" id="pageNum">01 / 15</div>
+
+    <div id="deck">
+
+        <!-- 01. Title -->
+        <div class="slide active justify-center pl-24">
+            <div class="animate-in">
+                <h2 class="text-xl text-gray-500 font-light mb-4 tracking-[0.5em] uppercase">Game Industry Analysis</h2>
+                <h1 class="text-7xl font-black text-white leading-tight mb-6" style="background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">애정의 경제학<br><span class="text-5xl text-white">The Mechanics of Affection</span></h1>
+                <div class="border-l-8 border-indigo-500 pl-8 py-4 mt-8">
+                    <p class="text-2xl font-semibold text-white mb-2">뇌과학적 유인에서 IP 우주로의 확장까지</p>
+                    <p class="text-xl text-gray-400 mb-6">Prepared by <strong class="text-white">Keorung</strong></p>
+                    <p class="text-gray-300 text-lg">
+                        <strong class="text-indigo">본 보고서의 논리는 다음 2개 프로젝트의 기초입니다.</strong><br>
+                        저는 <strong class="text-indigo">공학적 시야(Why)</strong>와 <strong class="text-indigo">연출적 역량(What)</strong>을 갖추고, <strong class="text-indigo">데이터 검증(How)</strong>으로 증명합니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 02. Table of Contents -->
+        <div class="slide">
+            <div class="header animate-in"><h1>목차</h1><span class="sub">논리적 구조 및 흐름</span></div>
+            <div class="content animate-in delay-1">
+                <div class="toc-grid">
+                    <div class="toc-column">
+                        <div class="toc-box" style="flex: 0.35; border-left: 4px solid #818cf8;" onclick="goToSlide(2)">
+                            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                                <div class="text-indigo font-bold text-xl mb-3 border-b border-gray-700 pb-2">I. 분석의 기초</div>
+                                <div class="flex justify-between items-center mb-2"><strong class="text-white text-xl">01. 서론</strong><span class="text-gray-500">3p</span></div>
+                                <div class="text-gray-400 text-sm leading-relaxed">
+                                    - 시장의 역설: 규모보다 '가치'에 집중하다<br>
+                                    - 핵심 질문: "왜 비싸도 계속 지르는가?"
+                                </div>
+                            </div>
+                        </div>
+                        <div class="toc-box" style="flex: 0.65; border-left: 4px solid #fbbf24;" onclick="goToSlide(3)">
+                            <div class="text-yellow font-bold text-xl mb-3 border-b border-gray-700 pb-2 flex-none">II. 심리적 동기</div>
+                            <div class="toc-sub-container">
+                                <div class="toc-item-row">
+                                    <div class="flex justify-between items-center mb-1"><strong class="text-white text-lg">02. 유인</strong><span class="text-gray-500">4p</span></div>
+                                    <div class="text-gray-400 text-sm pl-2 leading-relaxed">
+                                        <span style="display:block;">- 대전제: 도파민 이론</span>
+                                        <span style="display:block;">- 1. 캐릭터 설계: 갭 모에와 인지적 충격</span>
+                                        <span style="display:block;">- 2. 시각적 RPE: 변동 비율 강화 연출</span>
+                                    </div>
+                                </div>
+                                <div class="toc-divider"></div>
+                                <div class="toc-item-row">
+                                    <div class="flex justify-between items-center mb-1"><strong class="text-white text-lg">03. 설득</strong><span class="text-gray-500">7p</span></div>
+                                    <div class="text-gray-400 text-sm pl-2 leading-relaxed">
+                                        <span style="display:block;">- 대전제: 인지 부조화 이론</span>
+                                        <span style="display:block;">- 1. 애정의 증명: 사회적 가치</span>
+                                        <span style="display:block;">- 2. 서사적 당위성: FGO의 의식화</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="toc-column">
+                        <div class="toc-box" style="flex: 0.35; border-left: 4px solid #ef4444;" onclick="goToSlide(9)">
+                            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                                <div class="text-red font-bold text-xl mb-3 border-b border-gray-700 pb-2">III. 이탈 방지</div>
+                                <div class="flex justify-between items-center mb-2"><strong class="text-white text-xl">04. 이탈 방지</strong><span class="text-gray-500">10p</span></div>
+                                <div class="text-gray-400 text-sm leading-relaxed pl-2">
+                                    <span style="display:block;">- 1. 문제 제기: 루도내러티브 부조화</span>
+                                    <span style="display:block;">- 2. 시스템적 대응: 시스템적 대응만으론 부족할 수 있다.</span>
+                                    <span style="display:block;">- 3. 서사적 해결: 디에제틱 설계</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="toc-box" style="flex: 0.65; border-left: 4px solid #ec4899;" onclick="goToSlide(12)">
+                            <div class="text-pink font-bold text-xl mb-3 border-b border-gray-700 pb-2 flex-none">IV. 가치 실현</div>
+                            <div class="toc-sub-container">
+                                <div class="toc-item-row">
+                                    <div class="flex justify-between items-center mb-1"><strong class="text-white text-lg">05. 수익화 및 확장</strong><span class="text-gray-500">13p</span></div>
+                                    <div class="text-gray-400 text-sm pl-2 leading-relaxed">
+                                        <span style="display:block;">- 1. 내부 가치 순환: 선물 패키지 모델</span>
+                                        <span style="display:block;">- 2. 외부 IP 플라이휠: 팬덤 기반 확장</span>
+                                    </div>
+                                </div>
+                                <div class="toc-divider"></div>
+                                <div class="toc-item-row">
+                                    <div class="flex justify-between items-center mb-1"><strong class="text-green text-lg">06. 결론</strong><span class="text-gray-500">15p</span></div>
+                                    <div class="text-gray-400 text-sm pl-2 leading-relaxed">
+                                        - 애정의 아키텍처: 공학자와 연출가의 융합<br>
+                                        - 확장성과 비전
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 03. Market Context -->
+        <div class="slide">
+            <div class="header animate-in"><h1>01. 서론: 시장의 역설</h1><span class="sub">데이터로 보는 서브컬처 게임의 가치</span></div>
+            <div class="content">
+                <div class="grid-2">
+                    <div class="text-box animate-in delay-1">
+                        <h3 class="text-pink">소비의 우선순위가 뒤집힌 시장</h3>
+                        <div class="img-container" style="height: 220px; border: 2px solid #ec4899; margin-bottom: 20px;">
+                            <img src="걸러야할건캐릭이아니라끼니.jpg" alt="Meme" style="opacity: 0.6;">
+                            <div class="absolute inset-0 flex items-center justify-center flex-col bg-black/40">
+                                <p class="text-2xl font-black text-white text-center" style="text-shadow: 0 2px 10px rgba(0,0,0,0.8);">"걸러야 할 건<br><span class="text-pink">캐릭</span>이 아니라 <span class="text-yellow">끼니</span>다"</p>
+                            </div>
+                        </div>
+                        <div class="point-box" style="border-left-color: #ec4899;">
+                            <p>이 자조적인 농담은 서브컬처 유저에게 <strong>'애정'</strong>이 <strong>'생존(식비)'</strong>보다 상위 욕구임을 증명합니다. 이것이 <strong class="text-white">고가치 밀도(High Value Density)</strong>의 원천입니다.</p>
+                        </div>
+                    </div>
+                    <div class="img-container animate-in delay-2" style="background: #111; padding-bottom: 15px; justify-content: space-between; height: auto; min-height: 450px;">
+                        <div style="width: 100%; text-align: center; margin-top: 15px;">
+                            <h3 style="font-size: 1.2rem; color: #ccc; margin:0;">Market Efficiency Comparison</h3>
+                            <span style="font-size: 0.9rem; color: #666;">PCR(결제율) vs ARPPU(객단가)</span>
+                        </div>
+                        <div class="chart-wrapper" style="height: 200px;">
+                            <div class="chart-group-compare">
+                                <div class="bars-container">
+                                    <div class="bar-col"><div class="chart-bar" style="background:#444; --h:30%"></div><span class="chart-value">1.8%</span><span class="chart-legend">PCR</span></div>
+                                    <div class="bar-col"><div class="chart-bar" style="background:#555; --h:20%"></div><span class="chart-value">$50</span><span class="chart-legend">ARPPU</span></div>
+                                </div>
+                            </div>
+                            <div style="font-size: 2rem; color: #666; padding-bottom: 30px;">VS</div>
+                            <div class="chart-group-compare">
+                                <div class="bars-container">
+                                    <div class="bar-col"><div class="chart-bar" style="background:#312e81; --h:25%"></div><span class="chart-value">1.5%</span><span class="chart-legend">PCR</span></div>
+                                    <div class="bar-col"><div class="chart-bar" style="background:linear-gradient(to top, #818cf8, #ec4899); --h:90%"></div><span class="chart-value text-pink" style="font-size: 12pt;">$500+</span><span class="chart-legend text-pink" style="font-weight:bold;">ARPPU</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="width: 90%; border-top: 1px dashed #444; padding-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.9rem;">
+                            <div>
+                                <strong class="text-gray-400 block mb-1">1. 일반 F2P (Volume)</strong>
+                                <p class="text-gray-600">낮은 진입 장벽과 대규모 트래픽을 기반으로 한 박리다매형 수익 모델.</p>
+                            </div>
+                            <div>
+                                <strong class="text-pink block mb-1">2. 서브컬처 (Value)</strong>
+                                <p class="text-gray-500">낮은 전환율을 상쇄하는 <strong>압도적 객단가</strong>. '애정' 기반의 고관여 유저 집중.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 04. Attraction A -->
+        <div class="slide">
+            <div class="header animate-in"><h1>02. 유인: 도파민 이론</h1><span class="sub">울프람 슈르츠의 RPE 모델</span></div>
+            <div class="content">
+                <div class="grid-2">
+                    <div class="text-box animate-in delay-1">
+                        <h3 class="text-indigo">예측과 동기</h3>
+                        <div class="myth-box">
+                            <strong style="color: #777; font-size: 0.9em;">THE MYTH (통념)</strong>
+                            <p style="color: #999; margin: 0;">"도파민은 보상을 받을 때 느끼는 <span style="text-decoration: line-through;">'쾌락(Pleasure)'</span>이다."</p>
+                        </div>
+                        <div class="truth-box">
+                            <strong class="text-indigo" style="font-size: 0.9em;">THE TRUTH (진실)</strong>
+                            <p style="color: #fff; margin: 0;">"도파민은 보상을 <span class="text-indigo font-bold">예측(Prediction)</span>할 때 나오는 <br><span class="text-indigo font-bold">동기(Motivation)</span>의 연료다."</p>
+                            <p class="text-right text-gray-400 mt-2 text-sm italic">- Wolfram Schultz</p>
+                        </div>
+                        <p class="mt-4">뇌는 <strong>'긍정적 예측 오차(Positive RPE)'</strong>, 즉 기대 이상의 결과를 얻었을 때 그 행동을 가장 강력하게 학습합니다.</p>
+                    </div>
+                    <div class="img-container animate-in delay-2" style="padding: 20px; height: auto; border:1px solid #333;">
+                        <svg class="schultz-graph" viewBox="0 0 500 300" style="width:100%; height:100%;">
+                            <rect x="80" y="50" width="100" height="200" fill="rgba(129, 140, 248, 0.1)" />
+                            <line x1="50" y1="250" x2="450" y2="250" stroke="#444" stroke-width="2" />
+                            <line x1="50" y1="50" x2="50" y2="250" stroke="#444" stroke-width="2" />
+                            <text x="130" y="40" fill="#818cf8" font-size="16" font-weight="bold" text-anchor="middle">Signal (CS)</text>
+                            <text x="380" y="40" fill="#666" font-size="16" font-weight="bold" text-anchor="middle">Reward (R)</text>
+                            <polyline points="50,230 70,225 90,230 100,228 110,230 120,100 125,80 130,50 135,90 140,230 160,228 200,230 250,229 300,230 350,228 370,230 380,220 390,225 400,230 430,228 450,230" fill="none" stroke="#818cf8" stroke-width="4" stroke-linejoin="round" />
+                            <text x="180" y="100" fill="#818cf8" font-size="18">▲ 예측 시점 폭발</text>
+                            <text x="380" y="200" fill="#888" font-size="14" text-anchor="middle">보상 시점은 잠잠함</text>
+                        </svg>
+                        <div class="img-caption" style="position: relative; background: none; margin-top: 10px;">Schultz(1997): 학습된 뇌는 '보상'이 아닌 '예측'에 반응한다.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 05. Attraction B -->
+        <div class="slide">
+            <div class="header animate-in"><h1>02-1. 유인: 캐릭터 설계</h1><span class="sub">예측을 깨는 반전 매력</span></div>
+            <div class="content">
+                <div class="grid-2">
+                    <div class="img-container has-img animate-in delay-1" style="height: auto;">
+                        <img src="시로코 첫인상현인상.jpg" alt="시로코 밈 이미지" style="object-fit: contain; max-height: 450px;">
+                    </div>
+                    <div class="text-box animate-in delay-2">
+                        <h3 class="text-pink">밈의 정사화</h3>
+                        <div class="point-box" style="border-left-color: #818cf8;">
+                            <p class="mb-3"><strong>1. 기존 예측:</strong><br>은발, 푸른눈, 청초한 미소녀.<br><span class="text-indigo text-sm">➡ "전형적인 쿨뷰티 캐릭터겠지?" (도파민 평이)</span></p>
+                            <div style="height: 1px; background: #333; margin: 10px 0;"></div>
+                            <p><strong>2. 예측 오류 (RPE):</strong><br>복면을 쓰고 진지하게 <strong>"은행을 털자"</strong>.<br><span class="text-pink text-sm">➡ "예측 실패! (유쾌한 충격 = Positive RPE)"</span></p>
+                        </div>
+                        <p>이러한 '갭 모에'는 단순한 반전이 아니라, 뇌의 예측 오류 시스템을 자극하여 캐릭터를 강력하게 각인시키는 기법입니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 06. Attraction C (Height Fixed: auto) -->
+        <div class="slide">
+            <div class="header animate-in"><h1>02-2. 유인: 시각적 RPE</h1><span class="sub">변동 비율 강화와 감각적 보상</span></div>
+            <div class="content">
+                <div class="text-box" style="margin-bottom: 20px; text-align: center;">
+                    <p>행동심리학의 <strong>변동 비율 강화</strong>는 보상이 불확실할 때 행동이 가장 오래 지속됨을 증명합니다. 게임은 이를 시각적으로 구현합니다.</p>
+                </div>
+                <div class="grid-2">
+                    <div class="point-box animate-in delay-2" style="border-left-color: #4ade80; height: auto; display: flex; flex-direction: column;">
+                        <h3 class="text-green" style="font-size:1.4rem;">1. 긍정적 예측 오차</h3>
+                        <!-- Height 250px -->
+                        <div class="img-container has-img" style="height: 250px; margin-bottom: 10px;">
+                            <img src="fgo가챠반전연출.gif" alt="반전 연출" style="object-fit: contain;">
+                        </div>
+                        <p class="text-sm text-gray-400">은색(실망)에서 금색(환호)으로 변하는 <strong class="text-green">반전 연출</strong>은 뇌가 가장 좋아하는 '예측 밖의 보상'을 제공하여 도파민을 극대화합니다.</p>
+                    </div>
+                    <div class="point-box animate-in delay-2" style="border-left-color: #60a5fa; height: auto; display: flex; flex-direction: column;">
+                        <h3 class="text-blue" style="font-size:1.4rem;">2. 감각적 보상</h3>
+                        <!-- Height 250px -->
+                        <div class="img-container has-img" style="height: 250px; margin-bottom: 10px;">
+                            <img src="월드플리퍼 가챠연출.gif" alt="월드 플리퍼" style="object-fit: contain;">
+                        </div>
+                        <p class="text-sm text-gray-400"><strong>월드 플리퍼</strong>의 핀볼 연출처럼, 결과 확인 과정을 시각/청각적 쾌감이 있는 <strong class="text-blue">'미니게임'</strong>으로 만들어 과정 자체를 보상화합니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 07. Persuasion A -->
+        <div class="slide">
+            <div class="header animate-in"><h1>03. 설득: 인지 부조화 이론</h1><span class="sub">소비와 신념의 갈등 해소</span></div>
+            <div class="content">
+                <div class="grid-2">
+                    <div class="text-box animate-in delay-1">
+                        <h3 class="text-yellow">인지 부조화</h3>
+                        <p class="mb-4">유저는 자신의 행동(과금)과 기존 신념(절약)이 충돌할 때 심리적 불편함을 겪습니다. 이 갈등을 해소하는 것이 설득의 핵심입니다.</p>
+                        <div class="point-box" style="border-left-color: #f97316;">
+                            <strong class="text-white block mb-3 text-center">[심리적 갈등의 해소 과정]</strong>
+                            <div class="flex justify-between items-center text-center text-gray-400">
+                                <div><i class="fas fa-exclamation-circle text-red text-2xl mb-1"></i><br>충돌</div>
+                                <i class="fas fa-arrow-right"></i>
+                                <div><i class="fas fa-file-contract text-yellow text-2xl mb-1"></i><br><strong class="text-white">명분</strong></div>
+                                <i class="fas fa-arrow-right"></i>
+                                <div><i class="fas fa-check-circle text-green text-2xl mb-1"></i><br>해소</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="img-container animate-in delay-2" style="padding: 30px; flex-direction: row; gap: 20px; height: auto;">
+                        <div class="text-center flex-1">
+                            <div class="text-red text-xl font-bold mb-2">충돌</div>
+                            <div style="border: 2px solid #ef4444; padding: 15px; border-radius: 8px; background: rgba(239, 68, 68, 0.1);">
+                                <p class="text-white m-0">"돈 낭비다!"</p>
+                            </div>
+                        </div>
+                        <div class="text-3xl text-gray-600 self-center">➡</div>
+                        <div class="text-center flex-1">
+                            <div class="text-green text-xl font-bold mb-2">정당화</div>
+                            <div style="border: 2px solid #4ade80; padding: 15px; border-radius: 8px; background: rgba(74, 222, 128, 0.1);">
+                                <p class="text-white m-0">"이건 나를 위한<br>합리적인 투자!"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 08. Persuasion B -->
+        <div class="slide">
+            <div class="header animate-in"><h1>03-1. 설득: 애정의 증명</h1><span class="sub">사회적 가치와 소비</span></div>
+            <div class="content">
+                <div class="grid-2">
+                    <div class="text-box animate-in delay-1">
+                        <h3 class="text-pink">비효율적 소비의 사회적 가치</h3>
+                        <p class="mb-4">서브컬처 게임의 매출은 성능 효율 뿐만 아니라,<br><strong class="text-white">애정의 크기를 증명</strong>하려는 욕구에서 발생합니다.</p>
+                        <div class="point-box" style="border-left-color: #ec4899;">
+                            <ul class="space-y-4">
+                                <li>
+                                    <strong class="text-gray-400"><i class="fas fa-fist-raised mr-2"></i>Traditional RPG (P2W)</strong>
+                                    <p class="text-gray-500 text-sm mt-1">"더 강해지기 위해 구매한다." (이성적/효율)</p>
+                                </li>
+                                <li>
+                                    <strong class="text-white"><i class="fas fa-heart text-pink mr-2"></i>Subculture Game (P2L)</strong>
+                                    <p class="text-white text-sm mt-1">"애정을 <strong class="text-pink">과시</strong>하기 위해 구매한다." (감성적/낭만)</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="point-box animate-in delay-2" style="border-left-color: #fbbf24; display: flex; flex-direction: column; justify-content: center; height: auto;">
+                        <h4 class="text-center text-gray-400 mb-4">The Culture of Verification (인증 문화)</h4>
+                        <div class="community-post">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-white font-bold"><i class="fas fa-crown text-yellow mr-2"></i>애정빌런</span>
+                                <span class="post-badge">BEST</span>
+                            </div>
+                            <p class="text-white font-bold text-lg mb-2">"드디어 최애캐 인연 100렙 찍었습니다 (스압)"</p>
+                            <div class="border-t border-gray-700 pt-2 text-gray-500 text-sm">
+                                <i class="fas fa-thumbs-up"></i> 1,524 &nbsp;&nbsp; <i class="fas fa-comment"></i> 82
+                            </div>
+                        </div>
+                        <p class="text-center text-gray-500 text-sm">커뮤니티의 인정(Shoutout)은 그 어떤 성능 아이템보다 강력한 과금 동기이자 유지(Retention) 수단이 됩니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 09. Persuasion C -->
+        <div class="slide">
+            <div class="header animate-in"><h1>03-2. 설득: 서사적 당위성</h1><span class="sub">FGO의 의식화 모델</span></div>
+            <div class="content">
+                <div class="grid-2">
+                    <div class="text-box animate-in delay-1">
+                        <h3 class="text-yellow">가챠의 의식화</h3>
+                        <p class="mb-4">FGO는 소비 행위(Gacha)를 세계관 내의 <strong>'성스러운 의식'</strong>으로 포장하여 인지 부조화를 완벽하게 해소합니다.</p>
+                        <div class="point-box" style="border-left-color: #fbbf24;">
+                            <ul class="space-y-3">
+                                <li class="opacity-50"><i class="fas fa-times text-red mr-2"></i><strong>구매 (Buying):</strong> "데이터 쪼가리를 뽑는다." <span style="color:#888; font-size:0.9em;">(죄책감)</span></li>
+                                <li><i class="fas fa-check text-yellow mr-2"></i><strong>소환 (Summoning):</strong> "인류를 구하기 위해 영령과 계약한다." <span style="color:#888; font-size:0.9em;">(사명감)</span></li>
+                            </ul>
+                            <p class="mt-4 text-gray-400 text-sm">단순한 도박이 아니라, 세계를 구하기 위한 <strong>'투자'</strong>이자 <strong>'운명적 만남'</strong>으로 프레이밍됩니다.</p>
+                        </div>
+                    </div>
+                    <div class="img-container has-img animate-in delay-2" style="height: auto;">
+                        <img src="FGO 소환진.jpg" alt="FGO 소환진" style="object-fit: contain; max-height: 400px;">
+                        <div class="img-caption">단순 뽑기가 아닌, 운명을 건 '소환 의식'</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. Retention A -->
+        <div class="slide">
+            <div class="header animate-in"><h1>04. 이탈 방지 A: 문제 제기</h1><span class="sub">루도내러티브 부조화와 유일성의 붕괴</span></div>
+            <div class="content">
+                <div class="grid-2">
+                    <div class="text-box animate-in delay-1">
+                        <h3 class="text-red">존재론적 모순</h3>
+                        <p class="mb-4">서사적으로 나는 <strong>'유일한 구원자(선생)'</strong>이지만, 시스템(MMO)은 수천 명의 <strong>'다른 나(플레이어)'</strong>를 보여줍니다.</p>
+                        <div class="point-box" style="border-left-color: #ef4444;">
+                            <ul class="space-y-4">
+                                <li><strong class="text-red"><i class="fas fa-clone mr-2"></i>유일성의 붕괴</strong><p class="text-gray-500 text-sm mt-1">"세계관에선 내가 유일한 선생인데, 왜 랭킹창엔 5만 명의 다른 선생이 있지?"</p></li>
+                                <li><strong class="text-red"><i class="fas fa-users-slash mr-2"></i>몰입의 파괴</strong><p class="text-gray-500 text-sm mt-1">친구 목록, 길드 시스템 등 타인의 존재가 노출될 때마다 '내가 특별하다'는 환상은 깨집니다.</p></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="img-container animate-in delay-2" style="background: #220a0a; border: 2px solid #ef4444; text-align: center; height: auto; padding: 40px 0;">
+                        <i class="fas fa-bomb text-6xl text-red mb-4"></i>
+                        <h3 class="text-white mb-2">Uniqueness Collapsed</h3>
+                        <p class="text-gray-400">나와 똑같은 존재를 마주할 때<br>몰입은 깨진다.</p>
+                        <div style="position:absolute; bottom:-8px; color: #ef4444; font-family: monospace; font-size: 0.8rem;">ERROR: MULTIPLE PROTAGONISTS</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 11. Retention B -->
+        <div class="slide">
+            <div class="header animate-in"><h1>04-1. 이탈 방지 B: 시스템적 대응</h1><span class="sub">동일 캐릭터 편성 제한의 논리적 한계</span></div>
+            <div class="content">
+                <div class="grid-2">
+                    <div class="text-box animate-in delay-1">
+                        <h3 class="text-red">시스템적 제약과 부정적 UX</h3>
+                        <p class="mb-4">블루 아카이브는 '동일 인물 중복' 문제를 해결하기 위해, <strong>시스템 옵션으로 편성을 차단</strong>하는 방식을 택했습니다.</p>
+                        <div class="point-box" style="border-left-color: #ef4444;">
+                            <ul class="space-y-4">
+                                <li><strong class="text-gray-400"><i class="fas fa-question-circle mr-2"></i>설득력의 부재 (Why?)</strong><p class="text-gray-500 text-sm mt-1">서사적으로 "왜 두 명이 될 수 없는지" 설명하지 않고, 단순히 기능(ON/OFF)으로 막아버림으로써 몰입을 깹니다.</p></li>
+                                <li><strong class="text-red"><i class="fas fa-ban mr-2"></i>부정적 경험 (Negative UX)</strong><p class="text-gray-500 text-sm mt-1">"힘들게 뽑은 캐릭터를 왜 못 써?" 유저는 게임의 제약으로 인해 박탈감을 느끼게 됩니다.</p></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="img-container has-img animate-in delay-2" style="height: auto;">
+                        <img src="같은 이름의 학생 부대 편성.png" alt="블루 아카이브 옵션 스크린샷" style="object-fit: contain; max-height: 400px;">
+                        <div class="highlight-circle" style="top: 50%; left: 50%; width: 70%; height: 15%; transform: translate(-50%, -50%);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 12. Retention C -->
+        <div class="slide">
+            <div class="header animate-in"><h1>04-2. 이탈 방지 C: 서사적 해결</h1><span class="sub">디에제틱 설계로 모순을 필연으로</span></div>
+            <div class="content">
+                <div class="text-box mb-6 text-center animate-in delay-1" style="flex: none;">
+                    <p>해답은 시스템을 <strong class="text-green">세계관의 대전제(Lore)</strong>로 승격시켜 모순을 정당성으로 바꾸는 것입니다.</p>
+                </div>
+                <div class="grid-2">
+                    <div class="point-box animate-in delay-2" style="border-left-color: #60a5fa; height: auto; margin-bottom: 0;">
+                        <h3 class="text-blue">1. FGO: 영령과 서번트</h3>
+                        <p class="text-sm text-gray-500 mb-2 font-mono">Original ➡ Heroic Spirit ➡ Servant</p>
+                        <p class="text-gray-300">서번트는 '본체(영령)'의 데이터를 빌려 현계한 <strong>'사본(Instance)'</strong>입니다. 따라서 타 유저가 동일한 서번트를 보유해도, "같은 원본에서 파생된 또 다른 사본"이므로 논리적 충돌이 없습니다.</p>
+                    </div>
+                    <div class="point-box animate-in delay-3" style="border-left-color: #fbbf24; height: auto; margin-bottom: 0;">
+                        <h3 class="text-yellow">2. 림버스: 거울 세계</h3>
+                        <p class="text-sm text-gray-500 mb-2 font-mono">Identity ➡ Mirror World ➡ Extraction</p>
+                        <p class="text-gray-300">가챠는 <strong>'평행 우주(거울 세계)의 무수한 가능성'</strong> 중 하나를 빌려오는 행위입니다. 다양한 버전의 캐릭터(R/SSR)가 존재하는 것은 게임적 허용이 아닌, 세계관의 핵심 설정인 '다중 우주'의 증명입니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Monetization A (Internal Expansion) -->
+<div class="slide">
+    <div class="header animate-in">
+        <h1>05-A. 수익화: 내부 가치 순환</h1>
+        <span class="sub">애정 자산의 현금화</span>
+    </div>
+    
+    <!-- 전체 높이(h-full)를 잡고 그리드 배치 -->
+    <div class="content" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; height: 100%; align-items: stretch;">
+        
+        <!-- Left Box: 텍스트 설명 -->
+        <div class="glass-panel animate-in delay-1" style="padding: 2.5rem; display: flex; flex-direction: column; justify-content: center;">
+            <h3 class="text-pink-500 text-3xl font-bold mb-6">애정의 가치를 매출로 전환</h3>
+            <p class="text-gray-300 text-xl mb-8 leading-relaxed">
+                유저가 확보한 <strong>'캐릭터와의 애정'</strong>이라는 무형 자산을, <strong>'시간 단축'</strong> 또는 <strong>'즉각적인 관계 심화'</strong>라는 형태로 유료화하는 인게임 내부 확장 모델입니다.<br><br>
+                애정의 크기를 증명하려는 욕구에서 발생합니다.
+            </p>
+            <div class="border-l-4 border-pink-500 pl-6">
+                <ul class="space-y-6">
+                    <li>
+                        <strong class="block text-white text-xl mb-1"><i class="fas fa-gift text-pink-400 mr-2"></i> 캐릭터 선물 패키지</strong>
+                        <p class="text-gray-400 text-base">성능 무관, 호감도 즉시 상승. <strong>애정의 즉각적 충족</strong> 유도.</p>
+                    </li>
+                    <li>
+                        <strong class="block text-white text-xl mb-1"><i class="fas fa-ring text-yellow-400 mr-2"></i> 서약(결혼) 시스템</strong>
+                        <p class="text-gray-400 text-base">최고 호감도 도달 시, 유료 아이템(반지)으로 영원한 관계를 맺고 추가 스탯을 해금함.</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Right Box: 이미지 예시 (세로 배치 & Overflow 방지 적용) -->
+        <div class="glass-panel animate-in delay-2" style="padding: 1.5rem; display: flex; flex-direction: column; height: 100%; overflow: hidden;">
+            
+            <!-- 상단: 블루 아카이브 (flex: 1로 공간 자동 확보) -->
+            <div style="flex: 1; display: flex; flex-direction: column; min-height: 0; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex: none;">
+                    <h5 class="text-blue-400 font-bold text-lg">블루 아카이브</h5>
+                    <span class="text-xs text-gray-500">선물 패키지 UI</span>
+                </div>
+                <!-- 이미지 컨테이너: 남은 공간을 꽉 채우되, 이미지는 비율 유지하며 들어감 -->
+                <div class="img-frame" style="flex: 1; width: 100%; border-radius: 8px; border: 1px solid #333; background: #000; position: relative; overflow: hidden;">
+                    <img src="선물패키지.PNG" alt="블루 아카이브 선물 UI" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;">
+                </div>
+            </div>
+
+            <!-- 하단: 벽람항로 (flex: 1로 공간 자동 확보) -->
+            <div style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex: none;">
+                    <h5 class="text-pink-400 font-bold text-lg">벽람항로: 서약</h5>
+                    <span class="text-xs text-gray-500">서약의 반지 UI</span>
+                </div>
+                <!-- 이미지 컨테이너 -->
+                <div class="img-frame" style="flex: 1; width: 100%; border-radius: 8px; border: 1px solid #333; background: #000; position: relative; overflow: hidden;">
+                    <img src="서약패키지.jpg" alt="벽람항로 서약의 반지 UI" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;">
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+        <!-- 14. Expansion -->
+        <div class="slide">
+            <div class="header animate-in"><h1>05-B. 수익화: 외부 IP 플라이휠</h1><span class="sub">외부 확장과 지속 가능한 모델</span></div>
+            <div class="content">
+                <div class="grid-2">
+                    <div class="img-container has-img animate-in delay-1" style="aspect-ratio: 1/1; max-height: 450px; background: #000;">
+                        <img src="flywheel_comparison.png" alt="Flywheel Diagram" style="object-fit: contain;">
+                    </div>
+                    <div class="text-box animate-in delay-2">
+                        <h3 class="text-indigo">무한 동력 엔진: 팬덤</h3>
+                        <p class="mb-4">1957년 디즈니 모델이 단방향 확장이었다면, 2025년 모델은 유저가 참여하는 <strong>순환 구조</strong>입니다.</p>
+                        <ul class="space-y-3">
+                            <li style="background: #1a1a1a; padding: 10px; border-radius: 8px; border-left: 4px solid #818cf8;">
+                                <strong class="text-indigo block">Hub Shift:</strong> <span class="text-gray-400 text-sm">영화(정적) ➡ <strong>게임 & GaaS(동적)</strong></span>
+                            </li>
+                            <li style="background: #1a1a1a; padding: 10px; border-radius: 8px; border-left: 4px solid #c084fc;">
+                                <strong class="text-purple-400 block">Identity:</strong> <span class="text-gray-400 text-sm">단순 선호를 넘어 <strong>정체성 투영</strong>으로.</span>
+                            </li>
+                            <li style="background: #1a1a1a; padding: 10px; border-radius: 8px; border-left: 4px solid #ec4899;">
+                                <strong class="text-pink block">Prosumer:</strong> <span class="text-gray-400 text-sm">2차 창작과 커뮤니티가 IP 수명을 연장.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 15. Conclusion -->
+        <div class="slide">
+            <div class="header animate-in"><h1>06. 결론: 애정의 아키텍처</h1><span class="sub">The Architecture of Affection</span></div>
+            <div class="content">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; text-align: center;" class="animate-in delay-1">
+                    <div style="background: #1a1a1a; padding: 20px; border-radius: 12px; border-top: 4px solid #818cf8;">
+                        <div class="text-indigo text-4xl mb-2"><i class="fas fa-brain"></i></div>
+                        <h3 class="text-white text-xl font-bold mb-2">1. Neuroscience</h3>
+                        <p class="text-gray-500 text-sm">'예측을 배신하라'<br>RPE와 갭 모에로 유인 설계</p>
+                    </div>
+                    <div style="background: #1a1a1a; padding: 20px; border-radius: 12px; border-top: 4px solid #4ade80;">
+                        <div class="text-green text-4xl mb-2"><i class="fas fa-book-open"></i></div>
+                        <h3 class="text-white text-xl font-bold mb-2">2. Diegesis</h3>
+                        <p class="text-gray-500 text-sm">'모순을 정당화하라'<br>시스템적 허용을 세계관으로 포장</p>
+                    </div>
+                    <div style="background: #1a1a1a; padding: 20px; border-radius: 12px; border-top: 4px solid #ec4899;">
+                        <div class="text-pink text-4xl mb-2"><i class="fas fa-users"></i></div>
+                        <h3 class="text-white text-xl font-bold mb-2">3. Social Proof</h3>
+                        <p class="text-gray-500 text-sm">'비효율을 칭송하라'<br>애정 증명과 사회적 자본 획득</p>
+                    </div>
+                </div>
+                <div class="point-box animate-in delay-2 text-center" style="border-left-color: #818cf8;">
+                    <p class="text-lg text-gray-300 mb-2">
+                        <strong class="text-indigo">확장성(Scalability):</strong> 이 논리 구조는 다음 프로젝트에서 <strong class="text-pink">전투 메타 설계</strong>와 <strong class="text-yellow">데이터 검증</strong>을 위한 기초입니다.
+                    </p>
+                    <p class="text-gray-500">저는 <strong class="text-indigo">공학자(Engineer)의 분석력</strong>과 <strong class="text-pink">연출가(Director)의 감성</strong>을 융합하여 경험을 설계합니다.</p>
+                </div>
+                <div class="text-center mt-8 animate-in delay-3">
+                    <p class="text-3xl font-bold leading-relaxed text-gradient">
+                        "잊혀지지 않는 관계와 살아있는 세계를 파는 것,<br>그것이 지속 가능한 서브컬처 모델의 핵심입니다."
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-ui">
+        <div class="btn" onclick="goToSlide(1)" title="목차"><i class="fas fa-list"></i></div>
+        <div class="btn" onclick="prevSlide()" title="이전"><i class="fas fa-chevron-left"></i></div>
+        <div class="btn" onclick="nextSlide()" title="다음"><i class="fas fa-chevron-right"></i></div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progress = document.getElementById('progress');
+        const pageNum = document.getElementById('pageNum');
+        const total = slides.length;
+
+        function update() {
+            slides.forEach((s, i) => {
+                if(i === currentSlide) { s.classList.add('active'); } 
+                else { s.classList.remove('active'); }
+            });
+            progress.style.width = ((currentSlide + 1) / total) * 100 + '%';
+            pageNum.innerText = String(currentSlide + 1).padStart(2, '0') + ' / ' + total;
+        }
+
+        function nextSlide() { if(currentSlide < total - 1) { currentSlide++; update(); } }
+        function prevSlide() { if(currentSlide > 0) { currentSlide--; update(); } }
+        function goToSlide(index) { if(index >= 0 && index < total) { currentSlide = index; update(); } }
+
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if(e.key === 'ArrowLeft') prevSlide();
+            if(e.key === 'Home') goToSlide(0);
+        });
+
+        update();
+    </script>
+</body>
+</html>
